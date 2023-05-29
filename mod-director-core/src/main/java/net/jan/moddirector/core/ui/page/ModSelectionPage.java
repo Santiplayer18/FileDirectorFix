@@ -16,45 +16,57 @@ public class ModSelectionPage extends JPanel {
         titleLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, titleLabel.getMinimumSize().height));
         add(titleLabel);
 
-        selector.getSingleOptions().forEach(this::setupSingleOption);
-        selector.getGroupOptions().forEach(this::setupGroupOption);
+        // Create a new JPanel to hold the content
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+
+        // Add the content to the contentPanel
+        selector.getSingleOptions().forEach(option -> setupSingleOption(contentPanel, option));
+        selector.getGroupOptions().forEach((groupName, options) -> setupGroupOption(contentPanel, groupName, options));
+
+        // Wrap the contentPanel with a JScrollPane
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+        // Add the scrollPane to the main panel
+        add(scrollPane);
     }
 
-    private void setupSingleOption(SelectableInstallOption option) {
+    private void setupSingleOption(JPanel contentPanel, SelectableInstallOption option) {
         JPanel optionPanel = new JPanel();
         optionPanel.setLayout(new BoxLayout(optionPanel, BoxLayout.Y_AXIS));
 
         JCheckBox installCheckBox = new JCheckBox("Install");
         installCheckBox.setSelected(option.isSelected());
-        installCheckBox.addItemListener((e) -> option.setSelected(installCheckBox.isSelected()));
+        installCheckBox.addItemListener(e -> option.setSelected(installCheckBox.isSelected()));
         optionPanel.add(installCheckBox);
 
-        if(option.getDescription() != null) {
+        if (option.getDescription() != null) {
             optionPanel.add(new JLabel(asHtml(option.getDescription())));
         }
 
         optionPanel.setBorder(BorderFactory.createTitledBorder(option.getName()));
 
-        add(optionPanel);
+        contentPanel.add(optionPanel);
     }
 
-    private void setupGroupOption(String groupName, List<SelectableInstallOption> options) {
+    private void setupGroupOption(JPanel contentPanel, String groupName, List<SelectableInstallOption> options) {
         JPanel groupPanel = new JPanel();
         groupPanel.setLayout(new BoxLayout(groupPanel, BoxLayout.Y_AXIS));
 
         ButtonGroup group = new ButtonGroup();
 
-        for(SelectableInstallOption option : options) {
+        for (SelectableInstallOption option : options) {
             JPanel optionPanel = new JPanel();
             optionPanel.setLayout(new BoxLayout(optionPanel, BoxLayout.Y_AXIS));
 
             JRadioButton installRadioButton = new JRadioButton(option.getName());
             installRadioButton.setSelected(option.isSelected());
-            installRadioButton.addItemListener((e) -> option.setSelected(installRadioButton.isSelected()));
+            installRadioButton.addItemListener(e -> option.setSelected(installRadioButton.isSelected()));
             group.add(installRadioButton);
             optionPanel.add(installRadioButton);
 
-            if(option.getDescription() != null) {
+            if (option.getDescription() != null) {
                 optionPanel.add(new JLabel(asHtml(option.getDescription())));
             }
 
@@ -63,7 +75,7 @@ public class ModSelectionPage extends JPanel {
 
         groupPanel.setBorder(BorderFactory.createTitledBorder(groupName));
 
-        add(groupPanel);
+        contentPanel.add(groupPanel);
     }
 
     private String asHtml(String content) {
